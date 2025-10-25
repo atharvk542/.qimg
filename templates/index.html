@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>.qimg Viewer</title>
+    <link rel="stylesheet" href="../static/styles.css" />
+  </head>
+  <body>
+    <div id="top_panel">
+      <h1>Welcome To the .qimg Viewer!</h1>
+      <form
+        id="encode_form"
+        enctype="multipart/form-data"
+        action="/encode"
+        method="post"
+      >
+        <label for="encode_input">Encode Image to .qimg:</label>
+        <input
+          type="file"
+          id="encode_input"
+          name="file"
+          accept="image/*"
+          required
+        />
+        <button type="submit">Encode & Download</button>
+      </form>
+      <form id="decode_form" enctype="multipart/form-data">
+        <label for="decode_input">Decode .qimg to Image:</label>
+        <input
+          type="file"
+          id="decode_input"
+          name="file"
+          accept=".qimg"
+          required
+        />
+        <button type="submit">Decode & Download</button>
+      </form>
+      <h2>View .qimg File</h2>
+      <form id="view_form" enctype="multipart/form-data">
+        <label for="view_input">Upload .qimg file:</label>
+        <input
+          type="file"
+          id="view_input"
+          name="file"
+          accept=".qimg"
+          required
+        />
+        <label for="samples_input"
+          >Number of shots for measurement visualization:</label
+        >
+        <input
+          type="number"
+          id="samples_input"
+          name="samples"
+          value="10000"
+          min="1"
+        />
+        <label for="count_steps_input"
+          >Count steps per measurement (higher = brighter image):</label
+        >
+        <input
+          type="number"
+          id="count_steps_input"
+          name="count_steps"
+          value="1"
+          min="1"
+        />
+        <button type="button" id="view_prob_btn">View Probabilities</button>
+        <button type="button" id="view_measurement_btn">
+          View Measurements
+        </button>
+      </form>
+    </div>
+
+    <div id="result">
+      <p id="result_text"></p>
+      <img id="result_image" style="max-width: 100%; display: none" />
+      <button id="download_btn" style="display: none">Download Image</button>
+    </div>
+
+    <script>
+      function displayImage(blob, message) {
+        const url = URL.createObjectURL(blob);
+        const img = document.getElementById("result_image");
+        const text = document.getElementById("result_text");
+        const downloadBtn = document.getElementById("download_btn");
+        img.src = url;
+        img.style.display = "block";
+        text.innerText = message;
+        downloadBtn.style.display = "block";
+        downloadBtn.onclick = () => {
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "image.png";
+          a.click();
+        };
+      }
+
+      function displayError(error) {
+        const img = document.getElementById("result_image");
+        const text = document.getElementById("result_text");
+        const downloadBtn = document.getElementById("download_btn");
+        img.style.display = "none";
+        downloadBtn.style.display = "none";
+        text.innerText = `Error: ${error}`;
+      }
+
+      document
+        .getElementById("decode_form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          try {
+            const formData = new FormData(e.target);
+            const response = await fetch("/decode", {
+              method: "POST",
+              body: formData,
+            });
+            if (!response.ok) {
+              const errorData = await response.json();
+              displayError(errorData.error);
+              return;
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "decoded_image.png";
+            a.click();
+          } catch (error) {
+            displayError(error.message);
+          }
+        });
+
+      document
+        .getElementById("view_prob_btn")
+        .addEventListener("click", async () => {
+          try {
+            const formData = new FormData(document.getElementById("view_form"));
+            const response = await fetch("/view_prob", {
+              method: "POST",
+              body: formData,
+            });
+            if (!response.ok) {
+              const errorData = await response.json();
+              displayError(errorData.error);
+              return;
+            }
+            const blob = await response.blob();
+            displayImage(blob, "Probability visualization:");
+          } catch (error) {
+            displayError(error.message);
+          }
+        });
+
+      document
+        .getElementById("view_measurement_btn")
+        .addEventListener("click", async () => {
+          try {
+            const formData = new FormData(document.getElementById("view_form"));
+            formData.append(
+              "samples",
+              document.getElementById("samples_input").value
+            );
+            formData.append(
+              "count_steps",
+              document.getElementById("count_steps_input").value
+            );
+            const response = await fetch("/view_measurement", {
+              method: "POST",
+              body: formData,
+            });
+            if (!response.ok) {
+              const errorData = await response.json();
+              displayError(errorData.error);
+              return;
+            }
+            const blob = await response.blob();
+            displayImage(blob, "Measurement simulation visualization:");
+          } catch (error) {
+            displayError(error.message);
+          }
+        });
+    </script>
+  </body>
+</html>
