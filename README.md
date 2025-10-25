@@ -8,12 +8,7 @@ To run the web interface, clone the repository and install dependencies with `pi
 
 Encoding stores image data as quantum amplitudes. The RGB image is flattened into a 1D array of pixel values (each pixel contributes 3 values for R, G, B). These values are normalized by dividing by the Euclidean norm of the array, creating amplitudes that sum to 1 in squared magnitude. This represents the image as a quantum state:
 
-$$
-
-\ket{\psi} = \sum_{i=1}^{N} \alpha_i \ket{i}
-
-
-$$
+|ψ⟩ = ∑\_{i=1}^N α_i |i⟩
 
 where $N$ is the total number of color channels across all pixels (width × height × 3), and $\alpha_i$ are the normalized amplitudes.
 
