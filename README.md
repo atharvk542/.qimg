@@ -31,4 +31,8 @@ The probability loader visualizes the quantum probabilities. It computes $p_i = 
 
 The measurement loader simulates quantum measurements. It computes probabilities as above, then performs random sampling (default 10,000 shots) based on these probabilities. Each "measurement" selects a pixel index, and counts are accumulated (default increment of 1 per measurement, adjustable via count_steps for brighter images with fewer shots). The counts are clipped to [0, 255] and displayed as an image, showing measurement frequencies. This demonstrates how repeated measurements might reveal the image through quantum collapse.
 
-By default, 10,000 shots usually results in a very dark image, depending on the resolution of your image. This is because every single image must be counted multiple times in order for any color to appear. By zooming into the measurement-loaded images, you can see the individual red, green, and blue pixels forming the larger colors you see. Increasing the count_steps parameter will increase the brightness of the selected pixels. 
+By default, 10,000 shots usually results in a very dark image, depending on the resolution of your image. This is because every single image must be counted multiple times in order for any color to appear. By zooming into the measurement-loaded images, you can see the individual red, green, and blue pixels forming the larger colors you see. Increasing the count_steps parameter will increase the brightness of the selected pixels.
+
+## File Size
+
+Note that this .qimg file extension is purely meant as a toy extension. It does not provide any advantages over common image formats like .png or .jpeg. It is lossy, slow to encode/decode, and blows up the size of files by over 10 or even 100 times in certain situations. My goal with this was to hypothetically create an image function that could be "run on quantum computers" (even though this is most likely impossible).
